@@ -1,84 +1,79 @@
-#include<iostream>
+#include <iostream>
 using namespace std;
 
 struct Polinomio{
-int grado;
-int *coef;
+    int grado;
+    double* coef;
 };
+//Creare un polinomio reservando la memoria
 
-Polinomio crearPolinomio(int grado, int valores[]){
-Polinomio p;
-p.grado = grado;
+Polinomio crearPol(int grado){
 
-p.coef = new int[grado+1];
+    Polinomio p;
+    p.grado = grado;
+    p.coef = new double[grado+1];
 
-for(int i=0;i<=grado;i++)
-    p.coef[i] = valores[i];
-
-return p;
+    return p;
 }
 
-Polinomio sumar(Polinomio a, Polinomio b){
-int gradoMax = max(a.grado,b.grado);
+// para sumar los tres polinomios:
+Polinomio sumar3(Polinomio a, Polinomio b, Polinomio c){
 
-Polinomio r;
-r.grado = gradoMax;
-r.coef = new int[gradoMax+1];
+    int maxg = max(a.grado, max(b.grado,c.grado));
+    Polinomio r = crearPol(maxg);
 
-for(int i=0;i<=gradoMax;i++){
-    int va = (i<=a.grado)? a.coef[i]:0;
-    int vb = (i<=b.grado)? b.coef[i]:0;
-    r.coef[i]=va+vb;
+    for(int i=0;i<=maxg;i++) r.coef[i]=0;
+
+    for(int i=0;i<=a.grado;i++) r.coef[maxg-a.grado+i]+=a.coef[i];
+    for(int i=0;i<=b.grado;i++) r.coef[maxg-b.grado+i]+=b.coef[i];
+    for(int i=0;i<=c.grado;i++) r.coef[maxg-c.grado+i]+=c.coef[i];
+
+    return r;
 }
-return r;
-}
-
+//primero voy a multiplicar 2 polinomios "a", "b" en este caso para q me de un polinomio "d"
 Polinomio multiplicar(Polinomio a, Polinomio b){
-Polinomio r;
-r.grado = a.grado + b.grado;
-r.coef = new int[r.grado+1];
 
-for(int i=0;i<=r.grado;i++)
-    r.coef[i]=0;
+    Polinomio d = crearPol(a.grado+b.grado);
 
-for(int i=0;i<=a.grado;i++)
-    for(int j=0;j<=b.grado;j++)
-        r.coef[i+j]+=a.coef[i]*b.coef[j];
+    for(int i=0;i<=d.grado;i++) d.coef[i]=0;
 
-return r;
+    for(int i=0;i<=a.grado;i++)
+        for(int j=0;j<=b.grado;j++)
+            d.coef[i+j]+=a.coef[i]*b.coef[j];
+
+    return d;
 }
 
-void imprimir(Polinomio p){
-for(int i=p.grado;i>=0;i--){
-if(p.coef[i]!=0){
-cout<<p.coef[i]<<"x^"<<i;
-if(i>0) cout<<" + ";
+//para tener el producto de los 3 ahora usare el producto del polinomio "d" anteriormente creado y lo multiplicare con el polinomio "c"
+Polinomio producto3(Polinomio a, Polinomio b, Polinomio c){
+    return multiplicar(multiplicar(a,b),c);
 }
-}
-cout<<endl;
+
+void mostrar(Polinomio p){
+
+    for(int i=0;i<=p.grado;i++){
+        cout<<p.coef[i]<<"x^"<<p.grado-i;
+        if(i<p.grado) cout<<" + ";
+    }
+    cout<<endl;
 }
 
 int main(){
 
-int v1[]={3,0,1};
-int v2[]={5,-4};
-int v3[]={1,0,3};
+    //profesor la primera salida sera del enunciado del examen el segundo seran polinomios nuevos
+    Polinomio p1=crearPol(2);
+    p1.coef[0]=3; p1.coef[1]=4; p1.coef[2]=-1;
 
-Polinomio p1=crearPolinomio(2,v1);
-Polinomio p2=crearPolinomio(1,v2);
-Polinomio p3=crearPolinomio(2,v3);
+    Polinomio p2=crearPol(1);
+    p2.coef[0]=4; p2.coef[1]=-5;
 
-cout<<"Polinomio 1: "; imprimir(p1);
-cout<<"Polinomio 2: "; imprimir(p2);
-cout<<"Polinomio 3: "; imprimir(p3);
-
-Polinomio suma = sumar(sumar(p1,p2),p3);
-cout<<"\nSuma de los tres: ";
-imprimir(suma);
-
-Polinomio prod = multiplicar(multiplicar(p1,p2),p3);
-cout<<"Producto de los tres: ";
-imprimir(prod);
-
-return 0;
+    Polinomio p3=crearPol(2);
+    p3.coef[0]=4; p3.coef[1]=10; p3.coef[2]=2;
+//para mostrar la suma de los polinomios
+    cout<<"Suma:\n";
+    mostrar(sumar3(p1,p2,p3));
+//para mostrar el producto de losm polinomios
+    cout<<"Producto:\n";
+    mostrar(producto3(p1,p2,p3));
 }
+//los codigos los estoy ejecutando en windowspowershell ya q mi pc no tiene linux

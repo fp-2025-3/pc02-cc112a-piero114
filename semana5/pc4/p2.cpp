@@ -1,86 +1,103 @@
-#include<iostream>
-#include<cstring>
-#include<cstdlib>
-#include<ctime>
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
 using namespace std;
-
+//estructura para guardar los datos de los paises
 struct Seleccion{
-char nombre[20];
-int PG,PE,PP;
-int GF,GC;
-int DG;
-int puntos;
-double rendimiento;
+    char nombre[20];
+    int PG, PE, PP; 
+    int GF, GC;
+    int DG;
+    int puntos;
+    double rend;
 };
 
-void simular(Seleccion &s){
+//esta funciopn para generar los goles segun los resultados
+void generarEstadisticas(Seleccion &x){
 
-s.GF=0; s.GC=0;
+    x.GF = 0;
+    x.GC = 0;
 
-for(int i=0;i<s.PG;i++){
-    int gf=rand()%5+1;
-    int gc=rand()%gf;
-    s.GF+=gf; s.GC+=gc;
+    //para los partidos ganados
+    for(int i=0; i<x.PG; i++){
+        int gf = rand()%5 + 1;  //aqui tiene q marcar almenos 1
+        int gc = rand()%gf;     //aqui recibe menos goles de los q marcara
+        x.GF += gf;
+        x.GC += gc;
+    }
+
+    //para los partidos empatados
+    for(int i=0; i<x.PE; i++){
+        int g = rand()%5;
+        x.GF += g;
+        x.GC += g;
+    }
+
+    //para los partidos perdidos
+    for(int i=0; i<x.PP; i++){
+        int gc = rand()%5 + 1;
+        int gf = rand()%gc;     //esto es pq tiene q meter menos q el rival
+        x.GF += gf;
+        x.GC += gc;
+    }
+
+    //para los puntos
+    x.puntos = x.PG*3 + x.PE;
+    //para la diferencia de goles
+    x.DG = x.GF - x.GC;
+    //para el rendimiento
+    x.rend = (double)x.puntos / 300 * 100;
 }
+//aqui hare el ordenamiento burbuja
+void ordenarTabla(Seleccion v[], int n){
 
-for(int i=0;i<s.PE;i++){
-    int g=rand()%5;
-    s.GF+=g; s.GC+=g;
-}
+    for(int i=0; i<n-1; i++){
+        for(int j=0; j<n-1-i; j++){
 
-for(int i=0;i<s.PP;i++){
-    int gc=rand()%5+1;
-    int gf=rand()%gc;
-    s.GF+=gf; s.GC+=gc;
-}
-
-s.puntos=s.PG*3+s.PE;
-s.DG=s.GF-s.GC;
-s.rendimiento=(double)s.puntos/(100*3)*100;
-}
-
-void ordenar(Seleccion s[],int n){
-for(int i=0;i<n-1;i++)
-for(int j=i+1;j<n;j++)
-if(s[j].puntos>s[i].puntos ||
-(s[j].puntos==s[i].puntos && s[j].DG>s[i].DG) ||
-(s[j].puntos==s[i].puntos && s[j].DG==s[i].DG && s[j].GF>s[i].GF)){
-Seleccion t=s[i];
-s[i]=s[j];
-s[j]=t;
-}
+            if(v[j+1].puntos > v[j].puntos ||
+              (v[j+1].puntos == v[j].puntos && v[j+1].DG > v[j].DG)){
+                Seleccion aux = v[j];
+                v[j] = v[j+1];
+                v[j+1] = aux;
+            }
+        }
+    }
 }
 
 int main(){
-srand(time(0));
-Seleccion s[5];
-strcpy(s[0].nombre,"Pais_1");
-strcpy(s[1].nombre,"Pais_2");
-strcpy(s[2].nombre,"Pais_3");
-strcpy(s[3].nombre,"Pais_4");
-strcpy(s[4].nombre,"Pais_5");
-for(int i=0;i<5;i++){
-    s[i].PG=rand()%101;
-    s[i].PE=rand()%(101-s[i].PG);
-    s[i].PP=100-s[i].PG-s[i].PE;
-    simular(s[i]);
+
+    srand(time(0));
+
+    Seleccion equipo[5];
+
+    //agrego el nombre de los paises
+    strcpy(equipo[0].nombre,"Pais1");
+    strcpy(equipo[1].nombre,"Pais2");
+    strcpy(equipo[2].nombre,"Pais3");
+    strcpy(equipo[3].nombre,"Pais4");
+    strcpy(equipo[4].nombre,"Pais5");
+
+    // para la generacion de datos:
+    for(int i=0;i<5;i++){
+        equipo[i].PG = rand()%101;
+        equipo[i].PE = rand()%(101 - equipo[i].PG);
+        equipo[i].PP = 100 - equipo[i].PG - equipo[i].PE;//aqui genero de los 100 partidos primero los ganados luego los empatados y al final los perdidos
+
+
+        generarEstadisticas(equipo[i]);
+    }
+    ordenarTabla(equipo,5);
+
+    cout<<"Seleccion   PG   PE   PP   GF   GC   DG   Pts   Rend(%)\n";
+    cout<<"-------------------------------------------------------\n";
+
+    for(int i=0;i<5;i++){
+        cout<<equipo[i].nombre<<"   "<<equipo[i].PG<<"    "<<equipo[i].PE<<"    "<<equipo[i].PP<<"    "<<equipo[i].GF<<"    "<<equipo[i].GC<<"    "<<equipo[i].DG<<"    "<<equipo[i].puntos<<"    "<<equipo[i].rend<<"\n";
+    }
+
+    cout<<"\nCAMPEON: "<<equipo[0].nombre<<"| Puntaje: "<<equipo[0].puntos<<"| DG: "<<equipo[0].DG<<"| Rendimiento: "<<equipo[0].rend<<"%"<<endl;
+
+    return 0;
 }
-
-ordenar(s,5);
-
-cout<<"Seleccion PG  PE  PP  GF  GC  DG  Pts  Rend\n";
-cout<<"-------------------------------------------\n";
-
-for(int i=0;i<5;i++)
-    cout<<s[i].nombre<<"    "
-        <<s[i].PG<<"  "
-        <<s[i].PE<<"  "
-        <<s[i].PP<<"  "
-        <<s[i].GF<<"  "
-        <<s[i].GC<<"  "
-        <<s[i].DG<<"  "
-        <<s[i].puntos<<"  "
-        <<s[i].rendimiento<<"\n";
-
-cout<<"\nCAMPEON: "<<s[0].nombre<<"| Puntaje: "<<s[0].puntos<<"| DG: "<<s[0].DG<<"| Rendimiento: "<<s[0].rendimiento<<"%"<<endl;
-}
+//profesor aqui no tendre la misma salida del q mande en el pdf de la misma pc del viernes ya q el resultado es aleatorio :(
