@@ -1,0 +1,121 @@
+#include <iostream>
+#include <fstream>
+#include <string>//añado esto a diferencia del codigo q hizo en clase y no completo para el momento de mostrar el interior del reporte en la salida ya uso el string
+using namespace std;
+
+struct Venta {
+    int idVenta;
+    int idVendedor;
+    int idProducto;
+    int cantidad;
+    float precioUnitario;//aqui era la corecion float enves de double
+};
+
+int main(){
+
+    ifstream f("ventas.dat", ios::binary);
+
+    if (!f) {
+        cout << "error al abrir el archivo";
+        return 1;
+    }
+    int numRegistros;
+
+    f.read((char*)&numRegistros,sizeof(int));
+    cout <<numRegistros<< endl;
+    double montoTotal = 0;
+
+    const int MAX = 1000;//aqui tengo q asumir IDS menores a 1000
+
+    double totalVendedor[MAX] = {0};
+    int totalProducto[MAX] = {0};
+
+    Venta sospechosas[MAX];
+    int contSospechosas = 0;
+
+    Venta v;
+
+    for (int i = 0; i < numRegistros; ++i) {
+
+        f.read((char*)&v, sizeof(Venta));
+        double monto = v.cantidad * v.precioUnitario;
+        montoTotal += monto;//esto es para el vendedor con mayor recaudacion
+        if(v.idVendedor < MAX)
+            totalVendedor[v.idVendedor] += monto;//este para el producto mas vendido
+        if(v.idProducto < MAX)
+            totalProducto[v.idProducto] += v.cantidad;// y este para las ventas sospechosas
+        if(v.cantidad > 100 && contSospechosas < MAX){
+            sospechosas[contSospechosas++] = v;
+        }
+    }
+    //ahora para buscar al vendedor con mayor recaudación:
+    int mejorVendedor = 0;
+    double maxVenta = 0;
+
+    for(int i = 0; i < MAX; i++){
+        if(totalVendedor[i] > maxVenta){
+            maxVenta = totalVendedor[i];
+            mejorVendedor = i;
+        }
+    }
+    //en esta parte vamos buscar el producto más vendido:
+    int mejorProducto = 0;
+    int maxCantidad = 0;
+
+    for(int i = 0; i < MAX; i++){
+        if(totalProducto[i] > maxCantidad){
+            maxCantidad = totalProducto[i];
+            mejorProducto = i;
+        }
+    }
+    //ahora para generar el reporte:
+    ofstream reporte("reporte.txt");
+
+    if(!reporte){
+        cout << "error al crear reporte.txt";
+        f.close();
+        return 1;//por si hay un eeror al generar el reporte
+    }
+
+    reporte << "--- REPORTE GENERAL DE VENTAS ---\n\n";
+    reporte << "Total de registros: " << numRegistros << "\n\n";
+
+    reporte << "MONTO TOTAL VENDIDO:\n";
+    reporte << "S/. " << montoTotal << "\n\n";
+
+    reporte << "---------------------------------------\n";
+    reporte << "VENDEDOR CON MAYOR RECAUDACION:\n";
+    reporte << "ID Vendedor: " << mejorVendedor << "\n";
+    reporte << "Total vendido: S/. " << maxVenta << "\n\n";
+
+    reporte << "---------------------------------------\n";
+    reporte << "PRODUCTO MAS VENDIDO:\n";
+    reporte << "ID Producto: " << mejorProducto << "\n";
+    reporte << "Total unidades: " << maxCantidad << "\n\n";
+
+    reporte << "---------------------------------------\n";
+    reporte << "VENTAS SOSPECHOSAS (cantidad > 100):\n\n";
+
+    for(int i = 0; i < contSospechosas; i++){
+        reporte << "ID Venta: " << sospechosas[i].idVenta
+                << " | Vendedor: " << sospechosas[i].idVendedor
+                << " | Producto: " << sospechosas[i].idProducto
+                << " | Cantidad: " << sospechosas[i].cantidad
+                << "\n";
+    }
+    f.close();
+    reporte.close();
+    //ahora hay que abrir el reporte para que sea la salida de la terminal
+    ifstream mostrar("reporte.txt");
+
+    if(!mostrar){
+        cout<<"Error al abrir el reporte para mostrar"<<endl;
+        return 1;
+    }
+    string linea;
+    while(getline(mostrar, linea)){
+        cout<<linea<<endl;
+    }
+    mostrar.close();
+    return 0;
+}
