@@ -1,0 +1,21 @@
+--- REPORTE GENERAL DE VENTAS ---
+
+Total de registros: 1
+
+MONTO TOTAL VENDIDO:
+S/. 3.17022e+09
+
+---------------------------------------
+VENDEDOR CON MAYOR RECAUDACION:
+ID Vendedor: 8
+Total vendido: S/. 3.17022e+09
+
+---------------------------------------
+PRODUCTO MAS VENDIDO:
+ID Producto: 46
+Total unidades: 858993459
+
+---------------------------------------
+VENTAS SOSPECHOSAS (cantidad > 100):
+
+ID Venta: 5 | Vendedor: 8 | Producto: 46 | Cantidad: 858993459
