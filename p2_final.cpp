@@ -22,13 +22,12 @@ Punto* masLejano(Punto* p1, Punto* p2){
         return p2;
 }
 int main(){
-    Punto* p1;
-    Punto* p2;
+    Punto p1, p2;//corecion
     cout<<"Punto 1"<<endl;
-    leerPunto(p1);
+    leerPunto(&p1);//corecion
     cout<<"Punto 2"<<endl;
-    leerPunto(p2);
-    Punto* lejano = masLejano(p1,p2);
+    leerPunto(&p2);//correcion
+    Punto* lejano = masLejano(&p1,&p2);//correcion
     cout<<"El punto mas alejaod del centro es: "<<endl;
     cout<<"("<<lejano->x<<","<<lejano->y<<")"<<endl;
     return 0;
